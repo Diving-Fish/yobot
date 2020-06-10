@@ -169,6 +169,8 @@ class Gacha:
         if today != last_day:
             last_day = today
             day_times = 0
+        if day_limit != 0 and day_times+20 > day_limit:
+            return "{}今天剩余抽卡次数不足30次，不能抽一井".format(nickname, day_times)
         reply = ""
         result = ""
         flag_fully_30_times = True
@@ -221,8 +223,8 @@ class Gacha:
         db = db_conn.cursor()
         sql_info = list(db.execute(
             "SELECT colle FROM Colle WHERE qqid=?", (qqid,)))
-        db_conn.close()
         if len(sql_info) != 1:
+            db_conn.close()
             return nickname + "的仓库为空"
         colle = pickle.loads(sql_info[0][0])
         more_colle = []
@@ -230,8 +232,10 @@ class Gacha:
             sql_info = list(db.execute(
                 "SELECT colle FROM Colle WHERE qqid=?", (other_qq,)))
             if len(sql_info) != 1:
-                return "[CQ:at,qq={}]的仓库为空".format(other_qq)
+                db_conn.close()
+                return "[CQ:at,qq={}] 的仓库为空".format(other_qq)
             more_colle.append(pickle.loads(sql_info[0][0]))
+        db_conn.close()
         if not os.path.exists(os.path.join(self.setting["dirname"], "temp")):
             os.mkdir(os.path.join(self.setting["dirname"], "temp"))
         showed_colle = set(colle)
@@ -241,7 +245,7 @@ class Gacha:
         showdata["header"] = ["角色", nickname]
         for memb in moreqq_list:
             try:
-                membinfo = await self.bot_api.get_stranger_info(memb)
+                membinfo = await self.bot_api.get_stranger_info(user_id=memb)
                 showdata["header"].append(membinfo["nickname"])
             except:
                 showdata["header"].append(str(memb))
