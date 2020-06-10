@@ -913,7 +913,7 @@ var vm = new Vue({
         bossLastForChart: function() {
             const map = {};
             for (const i in this.challenges) {
-                if (this.challenges[i].is_continue) {
+                if (this.challenges[i].health_ramain == 0) {
                     const name = this.getPlayer(this.challenges[i].qqid).nickname;
                     if (name in map)
                         map[name] += 1;
